@@ -4,6 +4,7 @@ const { signToken } = require("../utils/auth");
 
 const resolvers = {
     Query: {
+        // app.get('/endpoint', (req, res) )
         me: async (parent, args, context) => {
             if (context.user) {
                 const userData = await User.findOne({ _id: context.user._id }).select("-__v -password").populate("books");
