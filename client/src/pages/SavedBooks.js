@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Card,
-  Button,
-  Row,
-  Col
-} from 'react-bootstrap';
+import { Container, Card, Button, Row, Col } from 'react-bootstrap';
 
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import { removeBookId } from "../utils/localStorage";
