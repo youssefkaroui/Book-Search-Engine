@@ -8,10 +8,16 @@ import { GET_ME } from "../utils/queries";
 import { REMOVE_BOOK } from "../utils/mutations";
 
 const SavedBooks = () => {
-  const { loading, data } = useQuery(GET_ME);
+  const { loading, error, data } = useQuery(GET_ME);
   const [removeBook] = useMutation(REMOVE_BOOK);
+  const [userData, setUserData] = useState({});
 
-  const userData = data?.me || [];
+
+  useEffect(() => {
+    if (data) {
+      setUserData(data.me);
+    }
+  }, [data]);
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
@@ -23,9 +29,16 @@ const SavedBooks = () => {
 
     try {
       await removeBook({
-        variables: { bookId },
+        variables: {bookId: bookId},
+        update: cache => {
+          const data = cache.readQuery({ query: GET_ME });
+          const userDataCache = data.me;
+          const savedBooksCache = userDataCache.savedBooks;
+          const updatedBookCache = savedBooksCache.filter((book) => book.bookId !== bookId);
+          data.me.savedBooks = updatedBookCache;
+          cache.writeQuery({ query: GET_ME , data: {data: {...data.me.savedBooks}}})
+        }
       });
-
       // upon success, remove book's id from localStorage
       removeBookId(bookId);
     } catch (err) {
@@ -33,11 +46,8 @@ const SavedBooks = () => {
     }
   };
 
-  // if data isn't here yet, say so
-  if (loading) {
-    return <h2>LOADING...</h2>;
-  }
-
+  if (loading) return <h2>LOADING...</h2>;
+  if (error) return <h2>Error: {error.message}</h2>;
 
   return (
     <>
