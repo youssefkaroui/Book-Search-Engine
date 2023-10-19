@@ -10,14 +10,8 @@ import { REMOVE_BOOK } from "../utils/mutations";
 const SavedBooks = () => {
   const { loading, error, data } = useQuery(GET_ME);
   const [removeBook] = useMutation(REMOVE_BOOK);
-  const [userData, setUserData] = useState({});
 
-
-  useEffect(() => {
-    if (data) {
-      setUserData(data.me);
-    }
-  }, [data]);
+  const userData = data?.me || {};
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
@@ -34,9 +28,11 @@ const SavedBooks = () => {
           const data = cache.readQuery({ query: GET_ME });
           const userDataCache = data.me;
           const savedBooksCache = userDataCache.savedBooks;
-          const updatedBookCache = savedBooksCache.filter((book) => book.bookId !== bookId);
+          const updatedBookCache = savedBooksCache.filter((book) => 
+          book.bookId !== bookId);
           data.me.savedBooks = updatedBookCache;
-          cache.writeQuery({ query: GET_ME , data: {data: {...data.me.savedBooks}}})
+          cache.writeQuery({ query: GET_ME , data: {data: 
+            {...data.me.savedBooks}}})
         }
       });
       // upon success, remove book's id from localStorage
